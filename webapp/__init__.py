@@ -1,0 +1,1 @@
+"""FastAPI frontend for ViralScope."""
