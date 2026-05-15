@@ -256,9 +256,11 @@ function renderEvaluation(evaluation, model) {
   renderCurveChart("precision-recall-curve", evaluation.precision_recall_curve || [], {
     xKey: "recall",
     yKey: "precision",
-    title: "Precision and recall across thresholds",
+    title: "How reliable the viral alerts are",
+    description: "Each dot tests a different score cutoff. Alerts right means fewer false alarms. Viral posts caught means fewer missed viral posts.",
     diagonal: false,
-    markerMode: "spread-duplicates"
+    collapseDuplicateX: true,
+    noteMode: "alert-quality"
   });
   renderTable(document.getElementById("platform-slices-table"), evaluation.slice_metrics?.platform || []);
   renderTable(document.getElementById("niche-slices-table"), evaluation.slice_metrics?.niche || []);
@@ -350,7 +352,8 @@ function renderCurveChart(containerId, rows, options) {
   const diagonal = options.diagonal
     ? `<line x1="${padding.left}" y1="${height - padding.bottom}" x2="${width - padding.right}" y2="${padding.top}" class="curve-reference" />`
     : "";
-  const markers = buildCurveMarkers(ordered, options, toX, toY);
+  const displayRows = normalizeCurveRows(ordered, options);
+  const markers = buildCurveMarkers(displayRows, options, toX, toY);
   const polyline = markers
     .map((marker) => `${marker.x.toFixed(1)},${marker.y.toFixed(1)}`)
     .join(" ");
@@ -359,7 +362,7 @@ function renderCurveChart(containerId, rows, options) {
       return `<circle cx="${marker.x.toFixed(1)}" cy="${marker.y.toFixed(1)}" r="3.5" class="curve-point" />`;
     })
     .join("");
-  const notes = renderCurveNotes(ordered, options);
+  const notes = renderCurveNotes(displayRows, options);
 
   container.innerHTML = `
     <div class="curve-shell">
@@ -385,7 +388,7 @@ function renderCurveChart(containerId, rows, options) {
       <div class="curve-meta">
         <div>
           <strong>${options.title}</strong>
-          <small>Held-out probability behavior on the latest validation window.</small>
+          <small>${options.description || "Held-out probability behavior on the latest validation window."}</small>
         </div>
         <div class="curve-notes">${notes}</div>
       </div>
@@ -393,41 +396,45 @@ function renderCurveChart(containerId, rows, options) {
   `;
 }
 
+function normalizeCurveRows(rows, options) {
+  if (!options.collapseDuplicateX) {
+    return rows;
+  }
+  const groups = new Map();
+  rows.forEach((point) => {
+    const key = Number(point[options.xKey] || 0).toFixed(6);
+    const current = groups.get(key);
+    if (!current || Number(point[options.yKey] || 0) > Number(current[options.yKey] || 0)) {
+      groups.set(key, point);
+    }
+  });
+  return Array.from(groups.values()).sort((left, right) => Number(left[options.xKey] || 0) - Number(right[options.xKey] || 0));
+}
+
 function buildCurveMarkers(rows, options, toX, toY) {
-  const markers = rows.map((point) => ({
+  return rows.map((point) => ({
     point,
     x: toX(point[options.xKey]),
     y: toY(point[options.yKey])
   }));
-
-  if (options.markerMode !== "spread-duplicates") {
-    return markers;
-  }
-
-  const groups = new Map();
-  markers.forEach((marker) => {
-    const key = Number(marker.point[options.xKey] || 0).toFixed(6);
-    if (!groups.has(key)) {
-      groups.set(key, []);
-    }
-    groups.get(key).push(marker);
-  });
-
-  groups.forEach((group) => {
-    if (group.length <= 1) {
-      return;
-    }
-    const maxSpread = Math.min(56, Math.max(12, (group.length - 1) * 1.25));
-    group.forEach((marker, index) => {
-      const ratio = group.length === 1 ? 0 : index / (group.length - 1);
-      marker.x -= ratio * maxSpread;
-    });
-  });
-
-  return markers;
 }
 
 function renderCurveNotes(rows, options) {
+  if (options.noteMode === "alert-quality") {
+    return rows
+      .slice(-3)
+      .map((point) => {
+        return `
+          <div class="curve-note">
+            <strong>Alerts right: ${percent(point.precision)}</strong>
+            <small>Viral posts caught: ${percent(point.recall)}</small>
+            <span>One possible alert setting</span>
+          </div>
+        `;
+      })
+      .join("");
+  }
+
   return rows
     .slice(-3)
     .map((point) => {
@@ -570,28 +577,198 @@ function setSelectValue(id, value) {
 
 function renderPrediction(result) {
   const ring = document.getElementById("score-ring");
-  ring.style.setProperty("--ring-angle", `${Math.max(0, Math.min(360, result.score * 3.6))}deg`);
-  document.getElementById("score-value").textContent = `${result.score}%`;
+  const score = Number(result.score || 0);
+  const signals = result.signals || [];
+  const confidence = confidenceLabel(result);
+  ring.style.setProperty("--ring-angle", `${Math.max(0, Math.min(360, score * 3.6))}deg`);
+  document.getElementById("score-value").textContent = `${score}%`;
   document.getElementById("score-bucket").textContent = result.bucket;
+  document.getElementById("result-decision").textContent = decisionLabel(score);
+  document.getElementById("result-confidence").textContent = confidence.label;
   document.getElementById("reasoning-summary").textContent = result.reasoning_summary;
-  document.getElementById("signal-list").innerHTML = result.signals.map((signal) => {
-    return `
-      <div class="signal-row">
-        <div class="signal-head"><span>${signal.label}</span><strong>${signal.value.toFixed(1)}</strong></div>
-        <div class="track"><div class="fill" style="width:${signal.value}%"></div></div>
-      </div>
-    `;
-  }).join("");
-  document.getElementById("recommendation-list").innerHTML = result.recommendations.map((item) => {
-    return `<div class="recommendation">${item}</div>`;
-  }).join("");
+  document.getElementById("analyst-note").textContent = buildAnalystNote(result, confidence);
+  document.getElementById("creator-signal-grid").innerHTML = renderCreatorSignalCards(signals);
+  document.getElementById("signal-list").innerHTML = signals.map(renderSignalBar).join("");
+  renderCreativePlan(result);
+  document.getElementById("recommendation-list").innerHTML = renderRecommendationList(result.recommendations || []);
   document.getElementById("positive-factors").innerHTML = renderFactorList(result.positive_factors, false);
   document.getElementById("negative-factors").innerHTML = renderFactorList(result.negative_factors, true);
 }
 
+function decisionLabel(score) {
+  if (score >= 75) {
+    return "High potential";
+  }
+  if (score >= 55) {
+    return "Strong watch";
+  }
+  if (score >= 30) {
+    return "Needs momentum";
+  }
+  return "Low signal";
+}
+
+function confidenceLabel(result) {
+  const score = Number(result.score || 0);
+  const factorCount = (result.positive_factors || []).length + (result.negative_factors || []).length;
+  const distanceFromMiddle = Math.abs(score - 50);
+  if (distanceFromMiddle >= 25 && factorCount >= 2) {
+    return { label: "High", reason: "the score is far from the uncertain middle and several signals agree" };
+  }
+  if (distanceFromMiddle >= 12 || factorCount >= 1) {
+    return { label: "Medium", reason: "the model has useful signal, but the result still depends on early data quality" };
+  }
+  return { label: "Exploratory", reason: "the score is close to the uncertain middle or has limited signal separation" };
+}
+
+function buildAnalystNote(result, confidence) {
+  const strongest = (result.positive_factors || [])[0]?.name || "No dominant positive factor yet";
+  const watchout = (result.negative_factors || [])[0]?.name || "No major weakness detected";
+  return `Best signal: ${strongest}. Main watchout: ${watchout}. Confidence is ${confidence.label.toLowerCase()} because ${confidence.reason}.`;
+}
+
+function renderCreatorSignalCards(signals) {
+  if (!signals.length) {
+    return `<div class="empty-state">Run a prediction to see creator signal cards.</div>`;
+  }
+  return signals.map((signal) => {
+    const value = Math.max(0, Math.min(100, Number(signal.value || 0)));
+    const quality = signalQuality(value);
+    return `
+      <article class="creator-signal ${quality.tone}">
+        <span>${escapeHTML(signal.label)}</span>
+        <strong>${quality.label}</strong>
+        <small>${Math.round(value)}/100 · ${signalCopy(signal.label)}</small>
+      </article>
+    `;
+  }).join("");
+}
+
+function signalQuality(value) {
+  if (value >= 75) {
+    return { label: "Strong", tone: "strong" };
+  }
+  if (value >= 45) {
+    return { label: "Developing", tone: "steady" };
+  }
+  return { label: "Needs work", tone: "weak" };
+}
+
+function signalCopy(label) {
+  const copy = {
+    "View velocity": "reach pace",
+    "Engagement rate": "quality of attention",
+    "Comment velocity": "conversation depth",
+    "Share velocity": "shareability",
+    "Audience lift": "reach beyond audience"
+  };
+  return copy[label] || "creator signal";
+}
+
+function renderSignalBar(signal) {
+  const value = Math.max(0, Math.min(100, Number(signal.value || 0)));
+  return `
+    <div class="signal-row">
+      <div class="signal-head"><span>${escapeHTML(signal.label)}</span><strong>${value.toFixed(1)}</strong></div>
+      <div class="track"><div class="fill" style="width:${value}%"></div></div>
+    </div>
+  `;
+}
+
+function renderCreativePlan(result) {
+  const caption = normalizeCaption(document.getElementById("caption").value);
+  const original = caption || "No caption or title entered yet.";
+  const improved = buildImprovedCaption(caption, result);
+  const lift = estimateLiftRange(result);
+  document.getElementById("before-caption").textContent = original;
+  document.getElementById("after-caption").textContent = improved;
+  document.getElementById("lift-range").textContent = lift.range;
+  document.getElementById("lift-note").textContent = lift.note;
+}
+
+function buildImprovedCaption(caption, result) {
+  const niche = document.getElementById("niche").value || "this topic";
+  const base = caption || `I tested one ${niche} idea for 7 days`;
+  const trimmed = stripTrailingPunctuation(base);
+  const negativeNames = new Set((result.negative_factors || []).map((factor) => factor.name));
+
+  if (negativeNames.has("View velocity")) {
+    return `${trimmed} - the result that surprised me in the first hour.`;
+  }
+  if (negativeNames.has("Comment velocity")) {
+    return `${trimmed}. Which part would you try first?`;
+  }
+  if (negativeNames.has("Share velocity")) {
+    return `Save this: ${lowerFirst(trimmed)} in one simple checklist.`;
+  }
+  if (negativeNames.has("Hashtag focus")) {
+    const nicheTag = String(niche).replace(/[^a-z0-9]/gi, "").toLowerCase() || "creator";
+    return `${trimmed} #${nicheTag} #creatorgrowth #productivity`;
+  }
+  return `${trimmed}. The result surprised me.`;
+}
+
+function estimateLiftRange(result) {
+  const score = Number(result.score || 0);
+  const weakSignals = (result.signals || []).filter((signal) => Number(signal.value || 0) < 45).length;
+  const negativeCount = (result.negative_factors || []).length;
+  const lift = Math.min(16, 4 + negativeCount * 3 + weakSignals * 2);
+  if (score >= 80) {
+    return {
+      range: `${Math.max(0, score - 2)}-${Math.min(99, score + 6)}%`,
+      note: "The post already has strong signal; focus on preserving momentum rather than expecting a large lift."
+    };
+  }
+  const low = Math.min(99, Math.round(score + Math.max(2, lift * 0.45)));
+  const high = Math.min(99, Math.round(score + lift));
+  return {
+    range: `${low}-${high}%`,
+    note: "Planning estimate only, based on current weak signals. It is not a guaranteed model outcome."
+  };
+}
+
+function normalizeCaption(value) {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function stripTrailingPunctuation(value) {
+  return normalizeCaption(value).replace(/[.!?]+$/g, "");
+}
+
+function lowerFirst(value) {
+  const text = normalizeCaption(value);
+  if (!text) {
+    return text;
+  }
+  return text.charAt(0).toLowerCase() + text.slice(1);
+}
+
+function renderRecommendation(item) {
+  const [advice, example] = String(item || "").split(/\s+Example:\s+/);
+  const exampleHtml = example
+    ? `<small><strong>Example:</strong> ${escapeHTML(example)}</small>`
+    : "";
+  return `
+    <div class="recommendation">
+      <span>${escapeHTML(advice)}</span>
+      ${exampleHtml}
+    </div>
+  `;
+}
+
+function renderRecommendationList(rows) {
+  if (!rows || !rows.length) {
+    return `<div class="empty-state">No recommended moves were generated for this prediction.</div>`;
+  }
+  return rows.map(renderRecommendation).join("");
+}
+
 function renderFactorList(rows, negative) {
   if (!rows || !rows.length) {
-    return `<div class="empty-state">No factors available yet.</div>`;
+    const message = negative
+      ? "No major improvement areas were detected for this prediction."
+      : "No strong positive factors were detected for this prediction.";
+    return `<div class="empty-state">${message}</div>`;
   }
   return rows.map((row) => {
     return `
@@ -797,6 +974,15 @@ function validationWindow(validation) {
 
 function percent(value) {
   return `${(Number(value || 0) * 100).toFixed(1)}%`;
+}
+
+function escapeHTML(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 function formatCell(value) {

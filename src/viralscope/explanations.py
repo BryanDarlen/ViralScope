@@ -100,17 +100,35 @@ def recommendations_from_factors(negative_factors: list[dict], engineered: dict)
     names = {factor["name"] for factor in negative_factors}
     recommendations = []
     if "View velocity" in names:
-        recommendations.append("Improve the opening hook or distribution timing to lift views per hour.")
+        recommendations.append(
+            "Improve the opening hook or distribution timing to lift views per hour. "
+            "Example: start with a clear payoff like 'I tested this focus playlist for 7 days. Here is what changed.'"
+        )
     if "Comment velocity" in names:
-        recommendations.append("Add a concrete question or opinion hook that invites replies.")
+        recommendations.append(
+            "Add a concrete question or opinion hook that invites replies. "
+            "Example: ask 'Which version would you use while studying: calm piano or full orchestra?'"
+        )
     if "Share velocity" in names:
-        recommendations.append("Make the payoff more saveable or shareable: checklist, surprise, template, or relatable moment.")
+        recommendations.append(
+            "Make the payoff more saveable or shareable: checklist, surprise, template, or relatable moment. "
+            "Example: frame it as '3 tracks to save for deep work, reading, and exam prep.'"
+        )
     if "Hashtag focus" in names and engineered.get("hashtag_count", 0) == 0:
-        recommendations.append("Add 2-4 niche-specific hashtags or topic tags.")
+        recommendations.append(
+            "Add 2-4 niche-specific hashtags or topic tags. "
+            "Example: use focused tags like #study, #focusmusic, and #productivity instead of broad generic tags."
+        )
     if "Posting time" in names:
-        recommendations.append("Test posting closer to your audience's active window, often evening or lunch hours.")
+        recommendations.append(
+            "Test posting closer to your audience's active window, often evening or lunch hours. "
+            "Example: compare the same format at 12 PM and 8 PM for two weeks."
+        )
     if not recommendations:
-        recommendations.append("Keep monitoring early velocity; the strongest next improvement is testing clearer hooks and thumbnails/titles.")
+        recommendations.append(
+            "Keep monitoring early velocity; the strongest next improvement is testing clearer hooks and thumbnails/titles. "
+            "Example: try two title styles, one curiosity-led and one benefit-led, then compare the first 2-hour view rate."
+        )
     return recommendations[:4]
 
 

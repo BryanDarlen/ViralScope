@@ -4,448 +4,665 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ViralScope</title>
+    <link rel="icon" type="image/png" href="/static/img/viralscopevonly.png">
+    <link rel="shortcut icon" type="image/png" href="/static/img/viralscopevonly.png">
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
-    <div class="shell">
-        <aside class="sidebar">
-            <div class="brand">
-                <div class="brand-mark">VS</div>
-                <div>
+    <div class="site-shell">
+        <header class="topbar">
+            <a class="brand" href="#home" aria-label="ViralScope home">
+                <span class="brand-mark">
+                    <img src="/static/img/viralscopevonly.png" alt="" aria-hidden="true">
+                </span>
+                <span>
                     <strong>ViralScope</strong>
-                    <span>Social intelligence desk</span>
-                </div>
-            </div>
+                    <small>AI virality intelligence</small>
+                </span>
+            </a>
 
-            <nav class="nav">
-                <button class="nav-link active" data-view="predict">Prediction Studio</button>
-                <button class="nav-link" data-view="train">Training Desk</button>
-                <button class="nav-link" data-view="evaluate">Model Health</button>
-                <button class="nav-link" data-view="data">Data Hub</button>
-                <button class="nav-link" data-view="about">Architecture</button>
+            <nav class="top-links" aria-label="Primary navigation">
+                <a href="#home">Home</a>
+                <a href="#features">Features</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#results">Results</a>
+                <a href="#contact">Pricing/Contact</a>
             </nav>
 
-            <div class="sidebar-card">
-                <span class="eyebrow">Active model</span>
-                <strong id="sidebar-model-name">Loading...</strong>
-                <p id="sidebar-model-source">Preparing local model state.</p>
+            <div class="top-actions">
+                <a class="button-link primary" href="#app">Open Studio</a>
             </div>
+        </header>
 
-            <div class="sidebar-card">
-                <span class="eyebrow">Benchmark set</span>
-                <div class="mini-stat">
-                    <strong id="sidebar-rows">-</strong>
-                    <small>rows</small>
-                </div>
-                <div class="mini-stat">
-                    <strong id="sidebar-positive-rate">-</strong>
-                    <small>viral share</small>
-                </div>
-            </div>
-
-            <div class="sidebar-card">
-                <span class="eyebrow">Data mode</span>
-                <p>Custom frontend with a Python virality engine. CSV-first and API-safe by default.</p>
-            </div>
-        </aside>
-
-        <main class="workspace">
-            <header class="hero">
+        <main>
+            <section class="hero" id="home">
                 <div class="hero-copy">
-                    <span class="eyebrow">Modern Social Dashboard</span>
-                    <h1>Model whether a post is about to break out, before the feed decides for you.</h1>
-                    <p>FastAPI now powers the app shell while the existing Python ML modules handle training, prediction, and evaluation behind the scenes.</p>
+                    <span class="eyebrow">Creator-grade AI signal engine</span>
+                    <h1>Predict the posts with breakout potential before the first wave fades.</h1>
+                    <p>ViralScope scores early momentum, compares it against platform behavior, and turns model output into simple creative guidance for YouTube, TikTok, Reddit, and X-style content workflows.</p>
+                    <div class="hero-actions">
+                        <a class="button-link primary hero-cta" href="#app">Predict virality</a>
+                        <a class="button-link secondary" href="#how-it-works">See workflow</a>
+                    </div>
                     <div class="chip-row" id="watchlist-chips"></div>
                 </div>
-                <div class="hero-stats" id="hero-stats"></div>
-            </header>
 
-            <div class="flash" id="flash" hidden></div>
-
-            <section class="view active" id="view-predict">
-                <div class="section-head">
-                    <span class="eyebrow">Prediction Studio</span>
-                    <h2>Compose a post scenario and read the signal mix live.</h2>
-                </div>
-                <div class="grid two-col">
-                    <section class="panel">
-                        <div class="panel-head">
-                            <h3>Composer</h3>
-                            <p>Quick scenarios, post context, and early momentum inputs.</p>
-                        </div>
-                        <div class="preset-row" id="preset-row"></div>
-                        <div class="panel-head">
-                            <h4>Live YouTube lookup</h4>
-                            <p>Paste a YouTube URL or video ID to load live official metrics into the composer.</p>
-                        </div>
-                        <form id="youtube-live-form" class="form-grid compact">
-                            <label class="full-span">
-                                <span>YouTube URL or video ID</span>
-                                <input type="text" id="youtube_video_url" name="youtube_video_url" placeholder="https://www.youtube.com/watch?v=...">
-                            </label>
-                            <div class="full-span actions">
-                                <button type="submit">Load live YouTube video</button>
-                            </div>
-                        </form>
-                        <form id="predict-form" class="form-grid">
-                            <label>
-                                <span>Platform</span>
-                                <select id="platform" name="platform"></select>
-                            </label>
-                            <label>
-                                <span>Niche</span>
-                                <select id="niche" name="niche"></select>
-                            </label>
-                            <label>
-                                <span>Media type</span>
-                                <select id="media_type" name="media_type">
-                                    <option value="short_video">short_video</option>
-                                    <option value="video">video</option>
-                                    <option value="image">image</option>
-                                    <option value="text">text</option>
-                                    <option value="link">link</option>
-                                </select>
-                            </label>
-                            <label>
-                                <span>Post date</span>
-                                <input type="date" id="post_date" name="post_date" required>
-                            </label>
-                            <label>
-                                <span>Post time</span>
-                                <input type="time" id="post_time" name="post_time" required>
-                            </label>
-                            <label>
-                                <span>Audience size</span>
-                                <input type="number" id="account_follower_count" name="account_follower_count" min="0" required>
-                            </label>
-                            <label>
-                                <span>Account age days</span>
-                                <input type="number" id="account_age_days" name="account_age_days" min="0" required>
-                            </label>
-                            <label>
-                                <span>Early window hours</span>
-                                <input type="number" id="early_window_hours" name="early_window_hours" min="0.25" step="0.25" required>
-                            </label>
-                            <label>
-                                <span>Early views</span>
-                                <input type="number" id="early_views" name="early_views" min="0" required>
-                            </label>
-                            <label>
-                                <span>Early likes</span>
-                                <input type="number" id="early_likes" name="early_likes" min="0" required>
-                            </label>
-                            <label>
-                                <span>Early comments</span>
-                                <input type="number" id="early_comments" name="early_comments" min="0" required>
-                            </label>
-                            <label>
-                                <span>Early shares</span>
-                                <input type="number" id="early_shares" name="early_shares" min="0" required>
-                            </label>
-                            <label class="full-span">
-                                <span>Caption / title</span>
-                                <textarea id="caption" name="caption" rows="4"></textarea>
-                            </label>
-                            <label class="full-span">
-                                <span>Hashtags</span>
-                                <input type="text" id="hashtags" name="hashtags">
-                            </label>
-                            <div class="full-span actions">
-                                <button type="submit" class="primary">Predict virality</button>
-                            </div>
-                        </form>
-                    </section>
-
-                    <section class="stack">
-                        <div class="panel">
-                            <div class="panel-head">
-                                <h3>Live score</h3>
-                                <p>Probability, signal bucket, and operator summary.</p>
-                            </div>
-                            <div class="result-top">
-                                <div class="score-ring" id="score-ring">
-                                    <div class="score-inner">
-                                        <strong id="score-value">--%</strong>
-                                        <span id="score-bucket">Waiting</span>
-                                    </div>
-                                </div>
-                                <div class="result-copy">
-                                    <div class="metric-strip">
-                                        <div class="metric-lite">
-                                            <span>Model</span>
-                                            <strong id="predict-model-name">-</strong>
-                                        </div>
-                                        <div class="metric-lite">
-                                            <span>Data mode</span>
-                                            <strong id="predict-data-mode">-</strong>
-                                        </div>
-                                    </div>
-                                    <p id="reasoning-summary">Run a prediction to see the current post summary.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="panel">
-                            <div class="panel-head">
-                                <h3>Momentum profile</h3>
-                                <p>How the post compares with platform baselines.</p>
-                            </div>
-                            <div class="signal-list" id="signal-list"></div>
-                        </div>
-
-                        <div class="panel">
-                            <div class="panel-head">
-                                <h3>Recommended moves</h3>
-                                <p>What to improve before or shortly after posting.</p>
-                            </div>
-                            <div class="recommendation-list" id="recommendation-list"></div>
-                        </div>
-                    </section>
-                </div>
-
-                <div class="grid two-col">
-                    <section class="panel">
-                        <div class="panel-head">
-                            <h3>What is helping</h3>
-                        </div>
-                        <div class="factor-list" id="positive-factors"></div>
-                    </section>
-                    <section class="panel">
-                        <div class="panel-head">
-                            <h3>What needs work</h3>
-                        </div>
-                        <div class="factor-list" id="negative-factors"></div>
-                    </section>
-                </div>
-            </section>
-
-            <section class="view" id="view-train">
-                <div class="section-head">
-                    <span class="eyebrow">Training Desk</span>
-                    <h2>Retrain the model or benchmark alternatives without leaving the browser.</h2>
-                </div>
-                <div class="grid two-col">
-                    <section class="panel">
-                        <div class="panel-head">
-                            <h3>Demo training</h3>
-                            <p>Use synthetic data to refresh the active model quickly.</p>
-                        </div>
-                        <form id="demo-train-form" class="form-grid compact">
-                            <label>
-                                <span>Synthetic rows</span>
-                                <input type="number" id="demo_rows" name="rows" min="300" max="12000" step="100">
-                            </label>
-                            <label>
-                                <span>Model family</span>
-                                <select id="demo_model_name" name="model_name">
-                                    <option value="gradient_boosting">gradient_boosting</option>
-                                    <option value="random_forest">random_forest</option>
-                                    <option value="logistic">logistic</option>
-                                </select>
-                            </label>
-                            <label class="checkbox">
-                                <input type="checkbox" id="demo_save_model" name="save_model">
-                                <span>Save trained model locally</span>
-                            </label>
-                            <div class="full-span actions">
-                                <button type="submit" class="primary">Train demo model</button>
-                                <button type="button" id="compare-models">Benchmark baselines</button>
-                            </div>
-                        </form>
-
-                        <div class="panel-head space-top">
-                            <h3>CSV training</h3>
-                            <p>Upload your own dataset with `is_viral`, `five_day_engagement_rate`, or final five-day metrics.</p>
-                        </div>
-                        <form id="upload-train-form" class="form-grid compact">
-                            <label class="full-span">
-                                <span>Training CSV</span>
-                                <input type="file" id="train_file" name="file" accept=".csv" required>
-                            </label>
-                            <label>
-                                <span>Model family</span>
-                                <select id="upload_model_name" name="model_name">
-                                    <option value="gradient_boosting">gradient_boosting</option>
-                                    <option value="random_forest">random_forest</option>
-                                    <option value="logistic">logistic</option>
-                                </select>
-                            </label>
-                            <label class="checkbox">
-                                <input type="checkbox" id="upload_save_model" name="save_model">
-                                <span>Save trained model locally</span>
-                            </label>
-                            <div class="full-span actions">
-                                <button type="submit" class="primary">Train from CSV</button>
-                            </div>
-                        </form>
-                    </section>
-
-                    <section class="stack">
-                        <div class="panel">
-                            <div class="panel-head">
-                                <h3>Dataset profile</h3>
-                            </div>
-                            <div class="metric-grid" id="dataset-summary-grid"></div>
-                            <div class="split-bars">
-                                <div>
-                                    <h4>Platform mix</h4>
-                                    <div id="platform-mix-bars"></div>
-                                </div>
-                                <div>
-                                    <h4>Virality by platform</h4>
-                                    <div id="virality-bars"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="panel">
-                            <div class="panel-head">
-                                <h3>Model benchmark</h3>
-                                <p>Compare baseline learners on the current dataset.</p>
-                            </div>
-                            <div id="comparison-chart" class="comparison-list empty-state">Run a benchmark to compare models.</div>
-                        </div>
-                    </section>
-                </div>
-            </section>
-
-            <section class="view" id="view-evaluate">
-                <div class="section-head">
-                    <span class="eyebrow">Model Health</span>
-                    <h2>Inspect the current model with temporal holdout diagnostics and probability quality checks.</h2>
-                </div>
-                <div class="metric-grid" id="health-metrics"></div>
-                <div class="grid two-col">
-                    <section class="panel">
-                        <div class="panel-head">
-                            <h3>Confusion matrix</h3>
-                        </div>
-                        <div class="matrix" id="confusion-matrix"></div>
-                    </section>
-                    <section class="panel">
-                        <div class="panel-head">
-                            <h3>Feature importance</h3>
-                        </div>
-                        <div class="bar-list" id="feature-importance-list"></div>
-                    </section>
-                </div>
-                <div class="grid two-col">
-                    <section class="panel">
-                        <div class="panel-head">
-                            <h3>Calibration curve</h3>
-                            <p>Checks whether predicted probabilities line up with observed outcomes.</p>
-                        </div>
-                        <div class="curve-chart" id="calibration-curve"></div>
-                    </section>
-                    <section class="panel">
-                        <div class="panel-head">
-                            <h3>Precision-recall curve</h3>
-                            <p>Shows how catch rate and precision trade off on the held-out window.</p>
-                        </div>
-                        <div class="curve-chart" id="precision-recall-curve"></div>
-                    </section>
-                </div>
-                <div class="grid two-col">
-                    <section class="panel">
-                        <div class="panel-head">
-                            <h3>Probability distribution</h3>
-                        </div>
-                        <div class="histogram" id="probability-histogram"></div>
-                    </section>
-                    <section class="panel">
-                        <div class="panel-head">
-                            <h3>Top scored validation rows</h3>
-                        </div>
-                        <div class="table-wrap">
-                            <table class="data-table" id="top-rows-table"></table>
-                        </div>
-                    </section>
-                </div>
-                <div class="grid two-col">
-                    <section class="panel">
-                        <div class="panel-head">
-                            <h3>Platform slices</h3>
-                            <p>Held-out performance by platform.</p>
-                        </div>
-                        <div class="table-wrap">
-                            <table class="data-table" id="platform-slices-table"></table>
-                        </div>
-                    </section>
-                    <section class="panel">
-                        <div class="panel-head">
-                            <h3>Niche slices</h3>
-                            <p>Held-out performance by niche.</p>
-                        </div>
-                        <div class="table-wrap">
-                            <table class="data-table" id="niche-slices-table"></table>
-                        </div>
-                    </section>
-                </div>
-            </section>
-
-            <section class="view" id="view-data">
-                <div class="section-head">
-                    <span class="eyebrow">Data Hub</span>
-                    <h2>Preview the current benchmark set and export synthetic data for local work.</h2>
-                </div>
-                <div class="grid two-col">
-                    <section class="panel">
-                        <div class="panel-head">
-                            <h3>Trend watchlist</h3>
-                        </div>
-                        <div class="watchlist" id="watchlist-list"></div>
-                    </section>
-                    <section class="panel">
-                        <div class="panel-head">
-                            <h3>Export</h3>
-                            <p>Download the current synthetic benchmark set.</p>
-                        </div>
-                        <div class="actions">
-                            <a class="button-link primary" href="/api/demo-data.csv" download>Download synthetic CSV</a>
-                        </div>
-                    </section>
-                </div>
-                <section class="panel">
-                    <div class="panel-head">
-                        <h3>Preview rows</h3>
+                <div class="hero-preview" aria-label="ViralScope product preview">
+                    <div class="preview-toolbar">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <strong>Live Studio</strong>
                     </div>
-                    <div class="table-wrap">
-                        <table class="data-table" id="preview-table"></table>
+                    <div class="preview-grid">
+                        <div class="preview-score">
+                            <span>Virality probability</span>
+                            <strong>73%</strong>
+                            <small>High-confidence breakout signal</small>
+                        </div>
+                        <div class="preview-card">
+                            <span>Hook velocity</span>
+                            <div class="mini-bars">
+                                <i style="--h: 48%"></i>
+                                <i style="--h: 72%"></i>
+                                <i style="--h: 58%"></i>
+                                <i style="--h: 86%"></i>
+                                <i style="--h: 66%"></i>
+                            </div>
+                        </div>
+                        <div class="preview-card wide">
+                            <span>Model readout</span>
+                            <p>Strong early views, healthy comment velocity, and a format that matches short-video discovery behavior.</p>
+                        </div>
+                    </div>
+                    <div class="hero-stats" id="hero-stats"></div>
+                </div>
+            </section>
+
+            <section class="landing-section" id="how-it-works">
+                <div class="section-head center">
+                    <span class="eyebrow">How it works</span>
+                    <h2>From raw post idea to readable viral signal.</h2>
+                </div>
+                <div class="process-grid">
+                    <article class="glass-card process-card">
+                        <div class="card-number">01</div>
+                        <div class="icon-orb">IN</div>
+                        <h3>Upload or input content</h3>
+                        <p>Paste a YouTube URL, fill the composer, or train from CSV data without scraping restricted platforms.</p>
+                    </article>
+                    <article class="glass-card process-card">
+                        <div class="card-number">02</div>
+                        <div class="icon-orb">AI</div>
+                        <h3>AI analyzes the signals</h3>
+                        <p>The model reads timing, caption structure, audience size, early engagement, and platform-normalized momentum.</p>
+                    </article>
+                    <article class="glass-card process-card">
+                        <div class="card-number">03</div>
+                        <div class="icon-orb">%</div>
+                        <h3>Receive prediction results</h3>
+                        <p>Get a 0-100 score, strongest drivers, weak spots, and practical moves to improve the post before it stalls.</p>
+                    </article>
+                </div>
+            </section>
+
+            <section class="landing-section feature-showcase" id="features">
+                <div class="showcase-copy">
+                    <span class="eyebrow">Feature highlight</span>
+                    <h2>Turn early attention into an operator-ready decision.</h2>
+                    <p>ViralScope is built for creator teams and ML reviewers who want more than a black-box score. The interface explains why the model believes a post is gaining or losing momentum.</p>
+                    <div class="showcase-metrics">
+                        <div>
+                            <strong>0-100</strong>
+                            <span>Virality score</span>
+                        </div>
+                        <div>
+                            <strong>5d</strong>
+                            <span>Outcome window</span>
+                        </div>
+                        <div>
+                            <strong>API-safe</strong>
+                            <span>Data boundary</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="showcase-panel">
+                    <div class="signal-card primary-signal">
+                        <span>Prediction</span>
+                        <strong>High</strong>
+                        <p>Early velocity is outperforming the platform baseline.</p>
+                    </div>
+                    <div class="signal-card">
+                        <span>Strongest factor</span>
+                        <strong>Share velocity</strong>
+                        <p>People are forwarding the post faster than expected.</p>
+                    </div>
+                    <div class="signal-card">
+                        <span>Recommended move</span>
+                        <strong>Tighten the hook</strong>
+                        <p>Lead with the payoff in the first line of the caption.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="landing-section" id="results">
+                <div class="section-head center">
+                    <span class="eyebrow">Explore tools</span>
+                    <h2>Everything a portfolio-grade virality system needs.</h2>
+                </div>
+                <div class="tool-grid">
+                    <article class="glass-card tool-card">
+                        <span class="badge">Live data</span>
+                        <h3>YouTube lookup</h3>
+                        <p>Paste a public video URL and score official metrics through the YouTube Data API.</p>
+                        <div class="visual-line"></div>
+                    </article>
+                    <article class="glass-card tool-card">
+                        <span class="badge">ML pipeline</span>
+                        <h3>Train models</h3>
+                        <p>Use synthetic data or CSV uploads to retrain baseline and tree-based classifiers.</p>
+                        <div class="visual-line"></div>
+                    </article>
+                    <article class="glass-card tool-card">
+                        <span class="badge">Evaluation</span>
+                        <h3>Model health</h3>
+                        <p>Inspect temporal validation, alert quality, calibration, and platform-level slices.</p>
+                        <div class="visual-line"></div>
+                    </article>
+                    <article class="glass-card tool-card">
+                        <span class="badge">Explainability</span>
+                        <h3>Creative guidance</h3>
+                        <p>Translate model factors into practical next moves for captions, timing, and momentum.</p>
+                        <div class="visual-line"></div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="app-workbench" id="app">
+                <div class="workbench-head">
+                    <div>
+                        <span class="eyebrow">ViralScope Studio</span>
+                        <h2>Run the working ML dashboard.</h2>
+                    </div>
+                    <div class="runtime-pills" aria-label="Active model summary">
+                        <div>
+                            <span>Active model</span>
+                            <strong id="sidebar-model-name">Loading...</strong>
+                        </div>
+                        <div>
+                            <span>Rows</span>
+                            <strong id="sidebar-rows">-</strong>
+                        </div>
+                        <div>
+                            <span>Viral share</span>
+                            <strong id="sidebar-positive-rate">-</strong>
+                        </div>
+                    </div>
+                </div>
+                <p class="runtime-source" id="sidebar-model-source">Preparing local model state.</p>
+
+                <nav class="workspace-nav" aria-label="ViralScope studio views">
+                    <button class="nav-link active" data-view="predict">Prediction Studio</button>
+                    <button class="nav-link" data-view="train">Training Desk</button>
+                    <button class="nav-link" data-view="evaluate">Model Health</button>
+                    <button class="nav-link" data-view="data">Data Hub</button>
+                    <button class="nav-link" data-view="about">Architecture</button>
+                </nav>
+
+                <div class="flash" id="flash" hidden></div>
+
+                <section class="view active" id="view-predict">
+                    <div class="section-head">
+                        <span class="eyebrow">Prediction Studio</span>
+                        <h2>Compose a post scenario and read the signal mix live.</h2>
+                    </div>
+                    <div class="grid two-col">
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3>Composer</h3>
+                                <p>Quick scenarios, post context, and early momentum inputs.</p>
+                            </div>
+                            <div class="preset-row" id="preset-row"></div>
+                            <div class="panel-head">
+                                <h4>Live YouTube lookup</h4>
+                                <p>Paste a YouTube URL or video ID to load live official metrics into the composer.</p>
+                            </div>
+                            <form id="youtube-live-form" class="form-grid compact">
+                                <label class="full-span">
+                                    <span>YouTube URL or video ID</span>
+                                    <input type="text" id="youtube_video_url" name="youtube_video_url" placeholder="https://www.youtube.com/watch?v=...">
+                                </label>
+                                <div class="full-span actions">
+                                    <button type="submit">Load live YouTube video</button>
+                                </div>
+                            </form>
+                            <form id="predict-form" class="form-grid">
+                                <label>
+                                    <span>Platform</span>
+                                    <select id="platform" name="platform"></select>
+                                </label>
+                                <label>
+                                    <span>Niche</span>
+                                    <select id="niche" name="niche"></select>
+                                </label>
+                                <label>
+                                    <span>Media type</span>
+                                    <select id="media_type" name="media_type">
+                                        <option value="short_video">short_video</option>
+                                        <option value="video">video</option>
+                                        <option value="image">image</option>
+                                        <option value="text">text</option>
+                                        <option value="link">link</option>
+                                    </select>
+                                </label>
+                                <label>
+                                    <span>Post date</span>
+                                    <input type="date" id="post_date" name="post_date" required>
+                                </label>
+                                <label>
+                                    <span>Post time</span>
+                                    <input type="time" id="post_time" name="post_time" required>
+                                </label>
+                                <label>
+                                    <span>Audience size</span>
+                                    <input type="number" id="account_follower_count" name="account_follower_count" min="0" required>
+                                </label>
+                                <label>
+                                    <span>Account age days</span>
+                                    <input type="number" id="account_age_days" name="account_age_days" min="0" required>
+                                </label>
+                                <label>
+                                    <span>Early window hours</span>
+                                    <input type="number" id="early_window_hours" name="early_window_hours" min="0.25" step="0.25" required>
+                                </label>
+                                <label>
+                                    <span>Early views</span>
+                                    <input type="number" id="early_views" name="early_views" min="0" required>
+                                </label>
+                                <label>
+                                    <span>Early likes</span>
+                                    <input type="number" id="early_likes" name="early_likes" min="0" required>
+                                </label>
+                                <label>
+                                    <span>Early comments</span>
+                                    <input type="number" id="early_comments" name="early_comments" min="0" required>
+                                </label>
+                                <label>
+                                    <span>Early shares</span>
+                                    <input type="number" id="early_shares" name="early_shares" min="0" required>
+                                </label>
+                                <label class="full-span">
+                                    <span>Caption / title</span>
+                                    <textarea id="caption" name="caption" rows="4"></textarea>
+                                </label>
+                                <label class="full-span">
+                                    <span>Hashtags</span>
+                                    <input type="text" id="hashtags" name="hashtags">
+                                </label>
+                                <div class="full-span actions">
+                                    <button type="submit" class="primary">Predict virality</button>
+                                </div>
+                            </form>
+                        </section>
+
+                        <section class="stack">
+                            <div class="panel">
+                                <div class="panel-head">
+                                    <h3>AI analyst report</h3>
+                                    <p>Probability, decision quality, and a plain-English readout.</p>
+                                </div>
+                                <div class="result-top">
+                                    <div class="score-ring" id="score-ring">
+                                        <div class="score-inner">
+                                            <strong id="score-value">--%</strong>
+                                            <span id="score-bucket">Waiting</span>
+                                        </div>
+                                    </div>
+                                    <div class="result-copy">
+                                        <div class="metric-strip">
+                                            <div class="metric-lite">
+                                                <span>Prediction</span>
+                                                <strong id="result-decision">Waiting</strong>
+                                            </div>
+                                            <div class="metric-lite">
+                                                <span>Confidence</span>
+                                                <strong id="result-confidence">-</strong>
+                                            </div>
+                                        </div>
+                                        <div class="metric-strip compact-strip">
+                                            <div class="metric-lite">
+                                                <span>Model</span>
+                                                <strong id="predict-model-name">-</strong>
+                                            </div>
+                                            <div class="metric-lite">
+                                                <span>Data mode</span>
+                                                <strong id="predict-data-mode">-</strong>
+                                            </div>
+                                        </div>
+                                        <p class="analyst-copy" id="reasoning-summary">Run a prediction to see the current post summary.</p>
+                                        <div class="analyst-note" id="analyst-note">The analyst report will explain the strongest signal and the main risk after prediction.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="panel">
+                                <div class="panel-head">
+                                    <h3>Creator signal dashboard</h3>
+                                    <p>Readable signal cards for velocity, engagement, comments, shares, and audience lift.</p>
+                                </div>
+                                <div class="creator-signal-grid" id="creator-signal-grid"></div>
+                                <div class="signal-list" id="signal-list"></div>
+                            </div>
+
+                            <div class="panel">
+                                <div class="panel-head">
+                                    <h3>Before/after action plan</h3>
+                                    <p>Turn the score into one practical content improvement and a realistic lift range.</p>
+                                </div>
+                                <div class="creative-plan" id="creative-plan">
+                                    <article class="creative-card">
+                                        <span>Before</span>
+                                        <strong id="before-caption">Run a prediction first.</strong>
+                                    </article>
+                                    <article class="creative-card after">
+                                        <span>After example</span>
+                                        <strong id="after-caption">An improved caption or hook will appear here.</strong>
+                                    </article>
+                                    <article class="creative-card lift">
+                                        <span>Estimated range</span>
+                                        <strong id="lift-range">--</strong>
+                                        <small id="lift-note">Planning estimate only, not a guaranteed outcome.</small>
+                                    </article>
+                                </div>
+                                <h4 class="panel-subtitle">Recommended moves</h4>
+                                <div class="recommendation-list" id="recommendation-list">
+                                    <div class="empty-state">Run a virality prediction to generate recommended moves.</div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="grid two-col">
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3>What is helping</h3>
+                            </div>
+                            <div class="factor-list" id="positive-factors">
+                                <div class="empty-state">Run a virality prediction to see the strongest positive factors.</div>
+                            </div>
+                        </section>
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3>What needs work</h3>
+                            </div>
+                            <div class="factor-list" id="negative-factors">
+                                <div class="empty-state">Run a virality prediction to see the main improvement areas.</div>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+
+                <section class="view" id="view-train">
+                    <div class="section-head">
+                        <span class="eyebrow">Training Desk</span>
+                        <h2>Retrain the model or benchmark alternatives without leaving the browser.</h2>
+                    </div>
+                    <div class="grid two-col">
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3>Demo training</h3>
+                                <p>Use synthetic data to refresh the active model quickly.</p>
+                            </div>
+                            <form id="demo-train-form" class="form-grid compact">
+                                <label>
+                                    <span>Synthetic rows</span>
+                                    <input type="number" id="demo_rows" name="rows" min="300" max="12000" step="100">
+                                </label>
+                                <label>
+                                    <span>Model family</span>
+                                    <select id="demo_model_name" name="model_name">
+                                        <option value="gradient_boosting">gradient_boosting</option>
+                                        <option value="random_forest">random_forest</option>
+                                        <option value="logistic">logistic</option>
+                                    </select>
+                                </label>
+                                <label class="checkbox">
+                                    <input type="checkbox" id="demo_save_model" name="save_model">
+                                    <span>Save trained model locally</span>
+                                </label>
+                                <div class="full-span actions">
+                                    <button type="submit" class="primary">Train demo model</button>
+                                    <button type="button" id="compare-models">Benchmark baselines</button>
+                                </div>
+                            </form>
+
+                            <div class="panel-head space-top">
+                                <h3>CSV training</h3>
+                                <p>Upload your own dataset with `is_viral`, `five_day_engagement_rate`, or final five-day metrics.</p>
+                            </div>
+                            <form id="upload-train-form" class="form-grid compact">
+                                <label class="full-span">
+                                    <span>Training CSV</span>
+                                    <input type="file" id="train_file" name="file" accept=".csv" required>
+                                </label>
+                                <label>
+                                    <span>Model family</span>
+                                    <select id="upload_model_name" name="model_name">
+                                        <option value="gradient_boosting">gradient_boosting</option>
+                                        <option value="random_forest">random_forest</option>
+                                        <option value="logistic">logistic</option>
+                                    </select>
+                                </label>
+                                <label class="checkbox">
+                                    <input type="checkbox" id="upload_save_model" name="save_model">
+                                    <span>Save trained model locally</span>
+                                </label>
+                                <div class="full-span actions">
+                                    <button type="submit" class="primary">Train from CSV</button>
+                                </div>
+                            </form>
+                        </section>
+
+                        <section class="stack">
+                            <div class="panel">
+                                <div class="panel-head">
+                                    <h3>Dataset profile</h3>
+                                </div>
+                                <div class="metric-grid" id="dataset-summary-grid"></div>
+                                <div class="split-bars">
+                                    <div>
+                                        <h4>Platform mix</h4>
+                                        <div id="platform-mix-bars"></div>
+                                    </div>
+                                    <div>
+                                        <h4>Virality by platform</h4>
+                                        <div id="virality-bars"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="panel">
+                                <div class="panel-head">
+                                    <h3>Model benchmark</h3>
+                                    <p>Compare baseline learners on the current dataset.</p>
+                                </div>
+                                <div id="comparison-chart" class="comparison-list empty-state">Run a benchmark to compare models.</div>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+
+                <section class="view" id="view-evaluate">
+                    <div class="section-head">
+                        <span class="eyebrow">Model Health</span>
+                        <h2>Inspect the current model with temporal holdout diagnostics and probability quality checks.</h2>
+                    </div>
+                    <div class="metric-grid" id="health-metrics"></div>
+                    <div class="grid two-col">
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3>Confusion matrix</h3>
+                            </div>
+                            <div class="matrix" id="confusion-matrix"></div>
+                        </section>
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3>Feature importance</h3>
+                            </div>
+                            <div class="bar-list" id="feature-importance-list"></div>
+                        </section>
+                    </div>
+                    <div class="grid two-col">
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3>Calibration curve</h3>
+                                <p>Checks whether predicted probabilities line up with observed outcomes.</p>
+                            </div>
+                            <div class="curve-chart" id="calibration-curve"></div>
+                        </section>
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3>Alert quality curve</h3>
+                                <p>Shows how often viral alerts are right and how many viral posts the model catches.</p>
+                            </div>
+                            <div class="curve-chart" id="precision-recall-curve"></div>
+                        </section>
+                    </div>
+                    <div class="grid two-col">
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3>Probability distribution</h3>
+                            </div>
+                            <div class="histogram" id="probability-histogram"></div>
+                        </section>
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3>Top scored validation rows</h3>
+                            </div>
+                            <div class="table-wrap">
+                                <table class="data-table" id="top-rows-table"></table>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="grid two-col">
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3>Platform slices</h3>
+                                <p>Held-out performance by platform.</p>
+                            </div>
+                            <div class="table-wrap">
+                                <table class="data-table" id="platform-slices-table"></table>
+                            </div>
+                        </section>
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3>Niche slices</h3>
+                                <p>Held-out performance by niche.</p>
+                            </div>
+                            <div class="table-wrap">
+                                <table class="data-table" id="niche-slices-table"></table>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+
+                <section class="view" id="view-data">
+                    <div class="section-head">
+                        <span class="eyebrow">Data Hub</span>
+                        <h2>Preview the current benchmark set and export synthetic data for local work.</h2>
+                    </div>
+                    <div class="grid two-col">
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3>Trend watchlist</h3>
+                            </div>
+                            <div class="watchlist" id="watchlist-list"></div>
+                        </section>
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3>Export</h3>
+                                <p>Download the current synthetic benchmark set.</p>
+                            </div>
+                            <div class="actions">
+                                <a class="button-link primary" href="/api/demo-data.csv" download>Download synthetic CSV</a>
+                            </div>
+                        </section>
+                    </div>
+                    <section class="panel">
+                        <div class="panel-head">
+                            <h3>Preview rows</h3>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="data-table" id="preview-table"></table>
+                        </div>
+                    </section>
+                </section>
+
+                <section class="view" id="view-about">
+                    <div class="section-head">
+                        <span class="eyebrow">Architecture</span>
+                        <h2>FastAPI shell, custom frontend, and the same Python virality engine underneath.</h2>
+                    </div>
+                    <div class="grid two-col">
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3>Why this stack fits better now</h3>
+                            </div>
+                            <div class="text-stack">
+                                <p>FastAPI plus custom HTML, CSS, and JavaScript gives ViralScope precise control over layout, spacing, interactions, and visual polish, which is a better fit for a product-grade dashboard.</p>
+                                <p>The backend still uses the same `src/viralscope` modules for cleaning, feature engineering, training, evaluation, and prediction. The frontend simply became more intentional.</p>
+                            </div>
+                        </section>
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3>System flow</h3>
+                            </div>
+                            <div class="flow">
+                                <div class="flow-step">Synthetic / CSV data</div>
+                                <div class="flow-step">Cleaning + labels</div>
+                                <div class="flow-step">Feature engineering</div>
+                                <div class="flow-step">Train + evaluate</div>
+                                <div class="flow-step">Predict + explain</div>
+                                <div class="flow-step">FastAPI + custom frontend</div>
+                            </div>
+                        </section>
                     </div>
                 </section>
             </section>
-
-            <section class="view" id="view-about">
-                <div class="section-head">
-                    <span class="eyebrow">Architecture</span>
-                    <h2>FastAPI shell, custom frontend, and the same Python virality engine underneath.</h2>
-                </div>
-                <div class="grid two-col">
-                    <section class="panel">
-                        <div class="panel-head">
-                            <h3>Why this stack fits better now</h3>
-                        </div>
-                        <div class="text-stack">
-                            <p>FastAPI plus custom HTML, CSS, and JavaScript gives ViralScope precise control over layout, spacing, interactions, and visual polish, which is a better fit for a product-grade dashboard.</p>
-                            <p>The backend still uses the same `src/viralscope` modules for cleaning, feature engineering, training, evaluation, and prediction. The frontend simply became more intentional.</p>
-                        </div>
-                    </section>
-                    <section class="panel">
-                        <div class="panel-head">
-                            <h3>System flow</h3>
-                        </div>
-                        <div class="flow">
-                            <div class="flow-step">Synthetic / CSV data</div>
-                            <div class="flow-step">Cleaning + labels</div>
-                            <div class="flow-step">Feature engineering</div>
-                            <div class="flow-step">Train + evaluate</div>
-                            <div class="flow-step">Predict + explain</div>
-                            <div class="flow-step">FastAPI + custom frontend</div>
-                        </div>
-                    </section>
-                </div>
-            </section>
         </main>
+
+        <footer class="footer" id="contact">
+            <div>
+                <a class="brand" href="#home" aria-label="ViralScope footer home">
+                    <span class="brand-mark">
+                        <img src="/static/img/viralscopevonly.png" alt="" aria-hidden="true">
+                    </span>
+                    <span>
+                        <strong>ViralScope</strong>
+                        <small>Predictive intelligence for social content.</small>
+                    </span>
+                </a>
+                <p>Built as a privacy-aware, API-safe ML portfolio project for creators, analysts, and reviewers.</p>
+            </div>
+            <div>
+                <h4>Product</h4>
+                <a href="#app">Prediction Studio</a>
+                <a href="#features">Feature Highlight</a>
+                <a href="#results">Results</a>
+            </div>
+            <div>
+                <h4>Data</h4>
+                <a href="#app">CSV Training</a>
+                <a href="#app">YouTube Lookup</a>
+                <a href="#app">Model Health</a>
+            </div>
+            <div>
+                <h4>Contact</h4>
+                <a href="mailto:hello@viralscope.local">hello@viralscope.local</a>
+                <a href="#contact">Portfolio Demo</a>
+                <span>© 2026 ViralScope</span>
+            </div>
+        </footer>
     </div>
 
     <script src="/static/js/app.js"></script>
